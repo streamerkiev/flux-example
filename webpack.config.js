@@ -1,5 +1,5 @@
 var config = {
-   entry: './main.js',
+   entry: './App.jsx',
 	
    output: {
       path:__dirname,

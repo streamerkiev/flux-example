@@ -4,72 +4,63 @@ import List from './List.jsx'
 import AppActions from '../lib/AppActions';
 import AppStore from '../lib/AppStore'
 
-
 class Content extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { articles: [], articlesApproved: [], message: '' };
-        this.handleClick = this.handleClick.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-        this.onRemove = this.onRemove.bind(this);
-    }
 
-    handleClick() {
-        if (document.getElementById('simpletext').value.length > 0 && this.state.articles.length < 10) {
-            AppActions.submitArticle(document.getElementById('simpletext').value)
-            document.getElementById('simpletext').value = ''
-        }
+        this.state = {
+            articles: [],
+            message: ''
+        };
+
+        this.handleAdd = this.handleAdd.bind(this);
+        this.onListArticles = this.onListArticles.bind(this);
     }
 
     componentDidMount() {
-        AppStore.addChangeListener('STORE_SUBMIT_ARTICLE', this.onSubmit);
-        AppStore.addChangeListener('STORE_REMOVE_ARTICLE', this.onRemove);
+        AppStore.addChangeListener(this.onListArticles);
     }
 
-    onRemove() {
-        this.listArticles()
+    onListArticles() {
+        this.listArticles();
     }
 
-
-    onSubmit() {
-         this.listArticles()
-    }
-
-    listArticles()
-    {
-        let usermessage = ''
-
-        if (this.state.articles.length > 9) {
-            usermessage = 'You have exceeded the number of articles you can submit,You cannot add more articles'
-        }
-
+    listArticles() {
         this.setState({
-            articles: AppStore.getAll(),
-            articlesApproved: AppStore.getApproved(),
-            message: usermessage
-        })
+            articles: AppStore.getArticles()
+        });
+    }
+
+    handleAdd() {
+        let textInput = document.getElementById('textInput');
+        let textInputValue = textInput.value;
+
+        if (textInputValue.length) {
+            AppActions.submitArticle(textInputValue);
+
+            textInput.value = '';
+        }
     }
 
     componentWillUnmount() {
-        AppStore.removeChangeListener('STORE_SUBMIT_ARTICLE', this.onChange)
-         AppStore.removeChangeListener('STORE_REMOVE_ARTICLE', this.onRemove)
+        AppStore.removeChangeListener(this.onListArticles);
     }
 
     render() {
-        var simpleContent =
+        return (
             <div>
                 {this.props.text}
                 <br />
-                Enter text : <input type="text" name="simpletext" id="simpletext" />
-                <Button handleClick={this.handleClick} text="SUBMIT" />
                 <br />
-                <List articles={this.state.articles} listHeader="Submitted Articles" />
-                {this.state.message}
-                <List articles={this.state.articlesApproved} listHeader="Approval Status" />
-            </div>;
+                Enter text : <input type="text" name="textInput" id="textInput" />
 
-        return simpleContent;
+                <Button handleClick={this.handleAdd} text="SUBMIT" />
+                <br />
+
+                <List articles={this.state.articles} listHeader="Submitted Articles" />
+            </div>
+        );
     }
 
 }
